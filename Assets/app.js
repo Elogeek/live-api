@@ -1,9 +1,73 @@
+/**
+ * Populating available schools in student add form.
+*/
+const form = document.querySelector('#student-add-form form');
+const submitButton = form.querySelector('button[type="submit"]');
+const schoolsSelect = form.querySelector('select');
 
-let studentListButton = document.getElementById('students-list');
+let xhr = new XMLHttpRequest();
+xhr.onload = function() {
+    const schools = JSON.parse(xhr.responseText);
+    schools.forEach(school => {
+        schoolsSelect.innerHTML += `
+            <option value="${school.id}">${school.name}</option>
+        `;
+    });
+}
+
+xhr.open('GET', '/api/schools');
+xhr.send();
+
+/**
+ * Ajout d'un student en base de données.
+ */
+// Affichage du form d'ajout d'un étudiant.
+document.getElementById('student-add-button').addEventListener('click', function() {
+    form.parentElement.style.display = 'block';
+});
+
+// Sending form.
+submitButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    const firstname = form.querySelector('input[name="firstname"]').value;
+    const lastname = form.querySelector('input[name="lastname"]').value;
+    let school = form.querySelector('select[name="school"]');
+    school = school.options[school.selectedIndex].value;
+
+    if(!firstname || !lastname || !school){
+        // TODO Afficher un message plus propre :-)
+        console.log("All data are not set");
+    }
+    else {
+        let xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            const response = JSON.parse(xhr.responseText);
+            if(response.hasOwnProperty('error') && response.hasOwnProperty('message')){
+                const div = document.createElement('div');
+                div.classList.add('alert', `alert-${response.error}`);
+                div.setAttribute('role', 'alert');
+                div.innerHTML = response.message;
+                document.body.appendChild(div);
+            }
+        }
+
+        const studentData = {
+            'firstname': firstname,
+            'lastname': lastname,
+            'school': school
+        };
+
+        xhr.open('POST', '/api/students');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(studentData));
+    }
+});
+
 
 /**
  * Récupération de la liste des utilisateurs au click du bouton.
  */
+let studentListButton = document.getElementById('students-list');
 studentListButton.addEventListener('click', function(e) {
     let xhr = new XMLHttpRequest();
     xhr.onload = function() {

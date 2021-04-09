@@ -7,9 +7,9 @@ use PDOException;
 
 class DB {
     private string $server = 'localhost';
-    private string $db = 'liva_api';
+    private string $db = 'live';
     private string $user = 'root';
-    private string $passwd = '';
+    private string $passwd = 'dev';
 
     private static ?PDO $dbInstance = null;
 
